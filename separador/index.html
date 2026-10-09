@@ -2,217 +2,227 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tá na Rede Edit — Separador de Cenas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Separador de Cenas</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#080b10;color:#f5f7fa;font-family:Arial,sans-serif;padding:16px}
-main{max-width:850px;margin:auto}
-a{color:#00e676}
-.card{background:#151a22;border:1px solid #303846;border-radius:15px;padding:16px;margin:14px 0}
-button,.pick{background:#00e676;color:#061109;border:0;border-radius:9px;padding:12px 15px;font-weight:bold;cursor:pointer;display:inline-block;margin:4px}
-button:disabled{opacity:.45;cursor:not-allowed}
-input,select{max-width:100%;margin:8px 0}
-video{width:100%;max-height:420px;background:#000;margin-top:12px}
-small,.muted{color:#b8c0cc}
-progress{width:100%;height:18px}
-.scene{border:1px solid #394252;padding:12px;border-radius:12px;margin:12px 0}
-.scene img{width:100%;max-width:220px;border-radius:8px;display:block;margin-bottom:8px}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-#status{white-space:pre-wrap;overflow-wrap:anywhere}
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d33;--line:#2b3858;--accent:#42e8a5;--muted:#aab6d3}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(150deg,#0b1020,#101b31);color:#f5f7ff;font:16px system-ui,Arial,sans-serif}
+main{max-width:850px;margin:auto;padding:22px 15px 45px}.brand{color:var(--accent);font-weight:800;letter-spacing:.12em;font-size:.8rem}
+h1{font-size:clamp(2rem,7vw,3.4rem);line-height:1.05;margin:12px 0}p{color:var(--muted);line-height:1.55}
+.panel{background:rgba(21,29,51,.94);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:16px}
+button,.filelabel{border:0;border-radius:12px;padding:13px 16px;font-weight:750;background:var(--accent);color:#06140e;cursor:pointer;display:inline-block}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#283654;color:#f5f7ff}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=file]{max-width:100%;color:var(--muted)}input[type=range]{width:100%;accent-color:var(--accent)}
+video{width:100%;max-height:420px;background:#05070c;border-radius:12px;margin-top:12px}
+.small{font-size:.88rem}.status{padding:12px;border-radius:10px;background:#0b1326;color:#d8e4ff;white-space:pre-wrap;overflow-wrap:anywhere}
+#results{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}.clip{padding:12px;border:1px solid var(--line);border-radius:12px;background:#0e172b}.clip strong{display:block}.clip a{color:var(--accent)}.clip-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.clip-actions button{font-size:.82rem;padding:9px 10px}.clip-actions .secondary{background:#283654;color:#f5f7ff}
+.note{border-left:3px solid #f2c66d;padding:10px 12px;background:#292515;border-radius:6px;color:#f5e9c6}
+.progress-wrap{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#0b1326}.progress-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:750}.progress-track{height:12px;background:#25314d;border-radius:99px;overflow:hidden;margin:10px 0}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#26c98b,#62f0bd);border-radius:99px;transition:width .2s}.progress-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.metric{padding:9px;border-radius:9px;background:#151d33}.metric span{display:block;color:var(--muted);font-size:.78rem}.metric strong{font-size:.98rem;overflow-wrap:anywhere}
 </style>
 </head>
-<body>
-<main>
-<a href="../">← Voltar ao Tá na Rede Edit</a>
-<h1>🎬 Separador de Cenas</h1>
-<p class="muted">Detecte mudanças de imagem e exporte os trechos do vídeo.</p>
-
-<section class="card">
-<h2>1. Escolha o vídeo</h2>
+<body><main>
+<div class="brand">FERRAMENTA DE EDIÇÃO • BETA</div>
+<h1>Separador<br>de Cenas</h1>
+<p>Importe um vídeo e encontre mudanças de cena automaticamente. Escolha baixar cada cena individualmente como vídeo MP4 ou áudio, ou baixe tudo junto em um único ZIP.</p>
+<section class="panel">
+<h2>1. Importar vídeo</h2>
 <input id="file" type="file" accept="video/*">
-<video id="video" controls playsinline></video>
-<p id="info" class="muted">Nenhum vídeo selecionado.</p>
-<div class="row">
-<label for="threshold">Sensibilidade:</label>
-<select id="threshold">
-<option value="0.12">Alta — mais cortes</option>
-<option value="0.20" selected>Média</option>
-<option value="0.32">Baixa — menos cortes</option>
-</select>
-<label for="interval">Analisar a cada:</label>
-<select id="interval">
-<option value="0.5">0,5 segundo</option>
-<option value="1">1 segundo</option>
-<option value="2">2 segundos</option>
-</select>
-</div>
-<button id="detect" disabled>🔎 Detectar cenas</button>
+<video id="video" controls playsinline hidden></video>
+<div id="fileinfo" class="small"></div>
+<div class="note small" style="margin-top:12px">YouTube: este protótipo não consegue baixar diretamente vídeos por um link do YouTube. Baixe/importе um arquivo de vídeo que você tenha direito de usar. Links do YouTube normalmente exigem um serviço autorizado no servidor e podem ter restrições.</div>
 </section>
-
-<section class="card">
-<h2>2. Resultados</h2>
-<p id="status">Escolha um vídeo para começar.</p>
-<progress id="progress" value="0" max="100"></progress>
+<section class="panel">
+<h2>2. Detectar mudanças</h2>
+<p class="small">A detecção compara quadros do vídeo. Movimentos rápidos, flashes ou mudanças de iluminação podem gerar cortes falsos; confira os tempos antes de exportar.</p>
+<label for="sensitivity">Sensibilidade da detecção: <b id="senslabel">18%</b></label>
+<input id="sensitivity" type="range" min="8" max="50" value="18">
+<div class="row" style="margin-top:12px"><button id="detect" disabled>Detectar cenas</button><button id="clear" class="secondary">Limpar</button></div>
+<div id="status" class="status" style="margin-top:12px">Escolha um vídeo para começar.</div>
+<div id="sceneListTitle" class="small" style="margin-top:14px;font-weight:800;display:none">CENAS ENCONTRADAS — toque no botão da cena que você quer baixar</div>
 <div id="results"></div>
-<div class="row">
-<button id="export" disabled>📦 Exportar todas em ZIP</button>
-</div>
-<p class="muted">A detecção compara amostras visuais; pode não identificar todas as cenas perfeitamente. O processamento acontece no seu navegador.</p>
 </section>
+<section class="panel">
+<h2>3. Baixar cenas ou exportar tudo</h2>
+<p class="small">O site analisa o vídeo inteiro, do começo ao fim, em busca de mudanças de cena — não fica limitado a três cenas. A detecção é aproximada; confira os tempos. A exportação usa um modo rápido para recortar sem reencodar o vídeo, preservando a qualidade original. Os cortes podem variar um pouco conforme os keyframes do vídeo. Os clipes são reunidos em um ZIP; a primeira exportação ainda precisa carregar o conversor pela internet.</p>
+<p class="small">Depois de detectar, cada divisão aparece em um cartão. Você pode baixar manualmente só o vídeo MP4 ou só o áudio MP3 de qualquer cena. Se preferir tudo de uma vez, use o botão ZIP — ele continua disponível.</p><button id="export" disabled>📦 Baixar TODAS as cenas em ZIP (MP4)</button>
+<div class="progress-wrap" aria-live="polite">
+ <div class="progress-head"><span id="progressstage">Aguardando exportação</span><span id="progresspercent">0%</span></div>
+ <div class="progress-track" role="progressbar" aria-label="Progresso da exportação" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressbar"><div class="progress-fill" id="progressfill"></div></div>
+ <div class="progress-meta">
+  <div class="metric"><span>Clipes prontos</span><strong id="clipcount">0 / 0</strong></div>
+  <div class="metric"><span>Velocidade de processamento</span><strong id="speed">—</strong></div>
+  <div class="metric"><span>Tempo decorrido</span><strong id="elapsed">00:00</strong></div>
+  <div class="metric"><span>Tempo restante estimado</span><strong id="remaining">—</strong></div>
+ </div>
+</div>
+<div id="exportstatus" class="status" style="margin-top:12px">Detecte as cenas para liberar a exportação.</div>
+</section>
+<p class="small">Privacidade: a análise do vídeo local acontece no navegador. Esta página não envia o arquivo para um servidor. Para exportar MP4, precisa de internet para carregar FFmpeg.wasm e JSZip. O modo rápido evita reencodar cada cena, mas o início/fim pode variar conforme os keyframes do vídeo. O vídeo é processado localmente no navegador.</p>
 </main>
-
 <script type="module">
 const $=id=>document.getElementById(id);
-let file=null, scenes=[], duration=0, ffmpeg=null, FFmpegClass=null, fetchFile=null, JSZip=null;
-const video=$('video'), status=$('status'), progress=$('progress');
-const say=t=>status.textContent=t;
-const fmt=t=>{t=Math.max(0,t);return `${Math.floor(t/60)}:${(t%60).toFixed(1).padStart(4,'0')}`};
-
-$('file').addEventListener('change',()=>{
- file=$('file').files[0];
- scenes=[];
- $('results').replaceChildren();
- $('export').disabled=true;
- $('detect').disabled=!file;
- if(!file)return;
- video.src=URL.createObjectURL(file);
- $('info').textContent=`${file.name} • ${(file.size/1024/1024).toFixed(1)} MB`;
- say('Vídeo carregado. Toque em “Detectar cenas”.');
+const file=$('file'), video=$('video'), detectBtn=$('detect'), exportBtn=$('export');
+let sourceUrl=null, scenes=[], duration=0, ffmpeg=null, ffmpegLoadPromise=null, exportStarted=0, completedBytes=0, completedClips=0, progressTimer=null;
+$('sensitivity').addEventListener('input',()=> $('senslabel').textContent=$('sensitivity').value+'%');
+file.addEventListener('change',()=>{
+ const f=file.files?.[0]; scenes=[]; renderScenes(); exportBtn.disabled=true;
+ if(!f)return;
+ if(sourceUrl)URL.revokeObjectURL(sourceUrl);
+ sourceUrl=URL.createObjectURL(f); video.src=sourceUrl; video.hidden=false;
+ $('fileinfo').textContent=`${f.name} • ${(f.size/1024/1024).toFixed(1)} MB`;
+ $('status').textContent='Vídeo carregado. Toque em “Detectar cenas”.';
+ detectBtn.disabled=false;
+ // Preload the MP4 engine while the user reviews/detects scenes, so export spends less time waiting.
+ $('exportstatus').textContent='Preparando o conversor MP4 em segundo plano para acelerar a exportação…';
+ loadFFmpeg().then(()=>{if(file.files?.[0]===f)$('exportstatus').textContent='Conversor MP4 pronto. Detecte as cenas e exporte quando quiser.'}).catch(()=>{if(file.files?.[0]===f)$('exportstatus').textContent='Conversor será carregado ao exportar. Mantenha a internet ligada.'});
 });
-
-function frameSignature(ctx,w,h){
- const d=ctx.getImageData(0,0,w,h).data;
- const out=[];
- for(let y=0;y<12;y++)for(let x=0;x<16;x++){
-  const i=(Math.floor(y*h/12)*w+Math.floor(x*w/16))*4;
-  out.push((d[i]*.299+d[i+1]*.587+d[i+2]*.114)/255);
- }
- return out;
-}
-function difference(a,b){
- let sum=0;
- for(let i=0;i<a.length;i++)sum+=Math.abs(a[i]-b[i]);
- return sum/a.length;
-}
-function waitEvent(el,event){
- return new Promise((resolve,reject)=>{
-  const ok=()=>{cleanup();resolve()};
-  const bad=()=>{cleanup();reject(new Error('Não foi possível ler o vídeo.'))};
-  const cleanup=()=>{el.removeEventListener(event,ok);el.removeEventListener('error',bad)};
-  el.addEventListener(event,ok,{once:true});el.addEventListener('error',bad,{once:true});
+$('clear').onclick=()=>{scenes=[];renderScenes();exportBtn.disabled=true;$('status').textContent='Lista limpa. Escolha um vídeo ou detecte novamente.';$('exportstatus').textContent='Detecte as cenas para liberar a exportação.'};
+function fmt(t){const m=Math.floor(t/60),s=(t%60).toFixed(1).padStart(4,'0');return `${String(m).padStart(2,'0')}:${s}`}
+function clock(sec){if(!Number.isFinite(sec)||sec<0)return '—';sec=Math.floor(sec);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+function setProgress(p,stage){p=Math.max(0,Math.min(100,p));$('progressfill').style.width=p+'%';$('progresspercent').textContent=Math.round(p)+'%';$('progressbar').setAttribute('aria-valuenow',String(Math.round(p)));if(stage)$('progressstage').textContent=stage}
+function updateMetrics(){if(!exportStarted)return;const elapsed=(Date.now()-exportStarted)/1000;$('elapsed').textContent=clock(elapsed);$('clipcount').textContent=completedClips+' / '+scenes.length;if(completedBytes>0&&elapsed>0)$('speed').textContent=(completedBytes/1024/1024/elapsed).toFixed(2)+' MB/s';if(completedClips>0&&scenes.length>completedClips){const perClip=elapsed/completedClips;$('remaining').textContent=clock(perClip*(scenes.length-completedClips))}else $('remaining').textContent=completedClips===scenes.length?'00:00':'Calculando…'}
+function resetProgress(){if(progressTimer)clearInterval(progressTimer);exportStarted=Date.now();completedBytes=0;completedClips=0;$('clipcount').textContent='0 / '+scenes.length;$('speed').textContent='Calculando…';$('elapsed').textContent='00:00';$('remaining').textContent='Calculando…';setProgress(0,'Preparando exportação');progressTimer=setInterval(updateMetrics,500)}
+function renderScenes(){
+ const box=$('results');box.innerHTML='';
+ $('sceneListTitle').style.display=scenes.length?'block':'none';
+ scenes.forEach((s,i)=>{
+  const d=document.createElement('div');d.className='clip';
+  d.innerHTML=`<strong>🎬 Cena ${i+1}</strong><div>${fmt(s.start)} – ${fmt(s.end)}</div><div class="small">Duração: ${(s.end-s.start).toFixed(1)} segundos</div><div class="clip-actions"><button type="button" data-action="video">⬇ Baixar vídeo MP4</button><button type="button" class="secondary" data-action="audio">♫ Baixar áudio MP3</button></div>`;
+  d.querySelector('[data-action="video"]').addEventListener('click',()=>exportOne(i,'video',d));
+  d.querySelector('[data-action="audio"]').addEventListener('click',()=>exportOne(i,'audio',d));
+  box.appendChild(d);
  });
+ if(scenes.length)exportBtn.disabled=false;
 }
-async function seek(t){
- if(Math.abs(video.currentTime-t)<.02)return;
- const p=waitEvent(video,'seeked');
- video.currentTime=t;
- await p;
-}
-$('detect').onclick=async()=>{
- if(!file)return;
- $('detect').disabled=true;
- $('export').disabled=true;
- $('results').replaceChildren();
+function downloadBlob(data,name,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+async function exportOne(index,kind,card){
+ const f=file.files?.[0];if(!f||!scenes[index])return;
+ const buttons=[...card.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);
+ detectBtn.disabled=true;exportBtn.disabled=true;
+ let inputName='entrada_individual';
  try{
-  if(!video.duration){await waitEvent(video,'loadedmetadata');}
-  duration=video.duration;
-  if(!Number.isFinite(duration)||duration<=0)throw Error('Duração do vídeo inválida.');
-  const w=96,h=54,canvas=document.createElement('canvas');
-  canvas.width=w;canvas.height=h;
-  const ctx=canvas.getContext('2d',{willReadFrequently:true});
-  const step=Number($('interval').value);
-  const threshold=Number($('threshold').value);
-  const cuts=[0];let prev=null;
-  const count=Math.ceil(duration/step);
-  for(let i=0;i<count;i++){
-   const t=Math.min(i*step,Math.max(0,duration-.05));
-   await seek(t);
-   ctx.drawImage(video,0,0,w,h);
-   const sig=frameSignature(ctx,w,h);
-   if(prev&&t>0&&difference(prev,sig)>=threshold)cuts.push(t);
-   prev=sig;
-   progress.value=Math.round((i+1)/count*100);
-   say(`Analisando vídeo… ${i+1}/${count} amostras`);
-   await new Promise(r=>setTimeout(r,0));
+  $('exportstatus').textContent=`Preparando ${kind==='video'?'MP4':'MP3'} da cena ${index+1}…`;
+  const engine=await loadFFmpeg();
+  const ext=(f.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';inputName='entrada.'+ext;
+  await engine.writeFile(inputName,new Uint8Array(await f.arrayBuffer()));
+  const sc=scenes[index],outName=kind==='video'?`cena_${String(index+1).padStart(3,'0')}.mp4`:`cena_${String(index+1).padStart(3,'0')}.mp3`;
+  const args=kind==='video'?['-ss',String(Math.max(0,sc.start)),'-i',inputName,'-t',String(Math.max(.1,sc.end-sc.start)),'-map','0:v:0','-map','0:a?','-c','copy','-avoid_negative_ts','make_zero','-movflags','+faststart',outName]:['-ss',String(Math.max(0,sc.start)),'-i',inputName,'-t',String(Math.max(.1,sc.end-sc.start)),'-vn','-map','0:a:0','-codec:a','libmp3lame','-q:a','4',outName];
+  const code=await engine.exec(args);if(code!==0)throw new Error(kind==='audio'?'Esta cena pode não ter áudio ou não foi possível extraí-lo.':'Não foi possível criar o MP4 desta cena.');
+  const data=await engine.readFile(outName);if(!data?.length)throw new Error('O arquivo gerado ficou vazio.');
+  downloadBlob(data, outName, kind==='video'?'video/mp4':'audio/mpeg');await engine.deleteFile(outName);await engine.deleteFile(inputName);
+  $('exportstatus').textContent=`Download da cena ${index+1} iniciado (${kind==='video'?'MP4':'MP3'}).`;
+ }catch(e){$('exportstatus').textContent='Erro ao baixar cena: '+(e?.message||e)+'. Se estiver baixando pela primeira vez, mantenha a internet ligada.';try{const eng=ffmpeg;if(eng)await eng.deleteFile(inputName)}catch{}}
+ finally{buttons.forEach(b=>b.disabled=false);detectBtn.disabled=false;exportBtn.disabled=!scenes.length}
+}
+function frameSignature(ctx,w,h){
+ const data=ctx.getImageData(0,0,w,h).data;let total=0,n=0;
+ // tiny grayscale grid, reducing sensitivity to small pixel noise
+ for(let gy=0;gy<18;gy++)for(let gx=0;gx<32;gx++){
+  const x=Math.min(w-1,Math.floor((gx+.5)*w/32)),y=Math.min(h-1,Math.floor((gy+.5)*h/18)),k=(y*w+x)*4;
+  total+=(data[k]*.299+data[k+1]*.587+data[k+2]*.114);n++;
+ }
+ const a=[];
+ for(let gy=0;gy<18;gy++)for(let gx=0;gx<32;gx++){
+  const x=Math.min(w-1,Math.floor((gx+.5)*w/32)),y=Math.min(h-1,Math.floor((gy+.5)*h/18)),k=(y*w+x)*4;
+  a.push(data[k]*.299+data[k+1]*.587+data[k+2]*.114);
+ }
+ return {a,mean:total/n};
+}
+detectBtn.onclick=async()=>{
+ if(!video.src)return;
+ detectBtn.disabled=true;exportBtn.disabled=true;scenes=[];renderScenes();
+ try{
+  await new Promise((resolve,reject)=>{if(video.readyState>=1)return resolve();video.onloadedmetadata=resolve;video.onerror=reject});
+  duration=video.duration;if(!Number.isFinite(duration)||duration<=0)throw Error('Não consegui ler a duração do vídeo.');
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+  canvas.width=96;canvas.height=54;
+  const step=.5, cuts=[0], threshold=Number($('sensitivity').value)/100;
+  let previous=null, checked=0;
+  for(let t=0.15;t<duration;t+=step){
+   video.currentTime=t;
+   await new Promise(resolve=>{const fn=()=>{video.removeEventListener('seeked',fn);resolve()};video.addEventListener('seeked',fn,{once:true});setTimeout(resolve,1500)});
+   try{ctx.drawImage(video,0,0,canvas.width,canvas.height)}catch(e){continue}
+   const sig=frameSignature(ctx,canvas.width,canvas.height);
+   if(previous){
+    let diff=0;for(let i=0;i<sig.a.length;i++)diff+=Math.abs(sig.a[i]-previous.a[i]);
+    diff=diff/sig.a.length/255;
+    if(diff>threshold && t-cuts[cuts.length-1]>.75)cuts.push(t);
+   }
+   previous=sig;checked++;
+   if(checked%10===0)$('status').textContent=`Analisando… ${Math.min(100,Math.round(t/duration*100))}%`;
   }
   cuts.push(duration);
-  scenes=[];
-  for(let i=0;i<cuts.length-1;i++){
-   if(cuts[i+1]-cuts[i]>=.25)scenes.push({start:cuts[i],end:cuts[i+1]});
-  }
-  await showScenes();
-  say(`Análise concluída: ${scenes.length} trechos encontrados. Confira os limites, pois a detecção é aproximada.`);
-  $('export').disabled=scenes.length===0;
- }catch(e){say('Erro: '+e.message)}
- finally{$('detect').disabled=!file}
+  scenes=cuts.slice(0,-1).map((start,i)=>({start,end:cuts[i+1]})).filter(s=>s.end-s.start>.25);
+  renderScenes();$('status').textContent=`Concluído: ${scenes.length} cenas encontradas. As opções de baixar vídeo MP4 ou áudio MP3 aparecem em cada cartão abaixo. Role para ver todas as cenas.`;
+  if(!scenes.length)$('status').textContent='Nenhuma cena encontrada. Tente aumentar a sensibilidade.';
+ }catch(e){$('status').textContent='Erro ao analisar: '+e.message}
+ finally{detectBtn.disabled=false;video.pause();video.currentTime=0}
 };
-async function showScenes(){
- const root=$('results');root.replaceChildren();
- const canvas=document.createElement('canvas');canvas.width=320;canvas.height=180;
- const ctx=canvas.getContext('2d');
- for(let i=0;i<scenes.length;i++){
-  const s=scenes[i];
-  await seek(Math.min(s.start+.1,Math.max(0,duration-.05)));
-  ctx.drawImage(video,0,0,320,180);
-  const card=document.createElement('div');card.className='scene';
-  const img=document.createElement('img');img.src=canvas.toDataURL('image/jpeg',.7);
-  const title=document.createElement('b');title.textContent=`Cena ${i+1} — ${fmt(s.start)} até ${fmt(s.end)}`;
-  const btn=document.createElement('button');btn.textContent='▶ Prévia';
-  btn.onclick=()=>{video.currentTime=s.start;video.play()};
-  card.append(img,title,document.createElement('br'),btn);
-  root.append(card);
- }
-}
-async function loadLibraries(){
- if(!FFmpegClass){
-  say('Carregando ferramentas de exportação…');
-  const core=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-  const util=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
-  const zip=await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
-  FFmpegClass=core.FFmpeg;fetchFile=util.fetchFile;JSZip=zip.default;
- }
- if(!ffmpeg){
-  ffmpeg=new FFmpegClass();
-  ffmpeg.on('progress',({progress:p})=>{progress.value=Math.round(p*100)});
+async function loadFFmpeg(){
+ if(ffmpeg && ffmpeg.loaded)return ffmpeg;
+ if(ffmpegLoadPromise)return ffmpegLoadPromise;
+ ffmpegLoadPromise=(async()=>{
+  $('exportstatus').textContent='Carregando o conversor MP4 em segundo plano… mantenha a página aberta.';
+  const [{FFmpeg},{toBlobURL}]=await Promise.all([
+   import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js'),
+   import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js')
+  ]);
+  ffmpeg=new FFmpeg();
+  ffmpeg.on('log',({message})=>{if(message && /frame=|time=/.test(message))$('exportstatus').textContent='Processando vídeo… '+message.slice(0,140)});
+  const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
+  const workerURL=await toBlobURL('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js','text/javascript');
   await ffmpeg.load({
-   coreURL:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js',
-   wasmURL:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm'
+   classWorkerURL:workerURL,
+   coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),
+   wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')
   });
- }
+  return ffmpeg;
+ })();
+ try{return await ffmpegLoadPromise}catch(e){ffmpegLoadPromise=null;ffmpeg=null;throw e}
 }
-$('export').onclick=async()=>{
- if(!file||!scenes.length)return;
- $('export').disabled=true;
+exportBtn.onclick=async()=>{
+ const f=file.files?.[0];if(!f||!scenes.length)return;
+ exportBtn.disabled=true;detectBtn.disabled=true;resetProgress();
+ let inputName='input_video', zip;
  try{
-  await loadLibraries();
-  say('Preparando vídeo para exportar. Não feche esta página.');
-  await ffmpeg.writeFile('inputvideo',await fetchFile(file));
-  const zip=new JSZip();
+  $('exportstatus').textContent='Carregando o conversor MP4… o recorte começa quando ele estiver pronto.';setProgress(1,'Carregando conversor MP4');
+  const engine=await loadFFmpeg();$('exportstatus').textContent='Conversor pronto; iniciando os cortes rápidos…';setProgress(5,'Conversor pronto');
+  const {default:JSZip}=await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
+  zip=new JSZip();
+  const ext=(f.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';
+  inputName='entrada.'+ext;
+  $('exportstatus').textContent='Carregando vídeo na memória…';setProgress(10,'Carregando vídeo');
+  await engine.writeFile(inputName,new Uint8Array(await f.arrayBuffer()));setProgress(15,'Vídeo carregado');
+  // One FFmpeg invocation for all cuts, instead of starting the wasm engine per clip.
+  // Stream-copy avoids re-encoding and is usually much faster on phones.
+  const args=[];
   for(let i=0;i<scenes.length;i++){
-   const s=scenes[i],name=`cena_${String(i+1).padStart(3,'0')}.mp4`;
-   say(`Exportando ${i+1}/${scenes.length}…`);
-   const result=await ffmpeg.exec([
-    '-ss',String(s.start),'-i','inputvideo','-t',String(s.end-s.start),
-    '-map','0:v:0?','-map','0:a:0?','-c:v','libx264','-preset','ultrafast',
-    '-crf','23','-c:a','aac','-movflags','+faststart','-y',name
-   ]);
-   if(result!==0)throw Error('FFmpeg não conseguiu exportar a cena '+(i+1));
-   const data=await ffmpeg.readFile(name);
-   zip.file(name,data);
-   await ffmpeg.deleteFile(name);
-   progress.value=Math.round((i+1)/scenes.length*100);
+   const s=scenes[i],outName=`cena_${String(i+1).padStart(3,'0')}.mp4`;
+   args.push('-ss',String(Math.max(0,s.start)),'-i',inputName,'-t',String(Math.max(.1,s.end-s.start)),
+    '-map','0:v:0','-map','0:a?','-c','copy','-avoid_negative_ts','make_zero','-movflags','+faststart',outName);
   }
-  say('Compactando cortes em ZIP…');
-  const blob=await zip.generateAsync({type:'blob'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='separador-de-cenas.zip';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
-  say('Pronto! O ZIP com os cortes foi enviado para download.');
+  $('exportstatus').textContent=`Recortando ${scenes.length} cenas em uma única execução rápida…`;
+  setProgress(20,'Recortando todas as cenas (modo rápido)');
+  const result=await engine.exec(args);
+  if(result!==0)throw new Error('O FFmpeg não conseguiu recortar todas as cenas. Tente um vídeo menor.');
+  for(let i=0;i<scenes.length;i++){
+   const outName=`cena_${String(i+1).padStart(3,'0')}.mp4`;
+   const data=await engine.readFile(outName);
+   if(!data || !data.length)throw new Error('O MP4 da cena '+(i+1)+' ficou vazio.');
+   zip.file(outName,data);completedBytes+=data.length;completedClips=i+1;updateMetrics();
+   await engine.deleteFile(outName);
+   setProgress(20+((i+1)/scenes.length)*67,`Preparando ZIP • ${i+1}/${scenes.length} clipes prontos`);
+   $('exportstatus').textContent=`Clipes prontos: ${i+1} de ${scenes.length}.`;
+  }
+  await engine.deleteFile(inputName);
+  $('exportstatus').textContent='Compactando os MP4 em um ZIP…';setProgress(87,'Criando arquivo ZIP');
+  const blob=await zip.generateAsync({type:'blob',compression:'STORE'},meta=>{$('exportstatus').textContent=`Compactando ZIP… ${meta.percent.toFixed(0)}%`;$('progressstage').textContent=`Criando ZIP • ${meta.percent.toFixed(0)}%`;setProgress(87+meta.percent*.13);});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='clipes_MP4.zip';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  setProgress(100,'Download pronto');$('remaining').textContent='00:00';$('exportstatus').textContent=`Concluído! ${scenes.length} clipes MP4 separados foram reunidos em clipes_MP4.zip. O download foi iniciado.`;
  }catch(e){
-  say('Não foi possível exportar: '+e.message+'. Tente um vídeo menor e confira sua conexão.');
- }finally{$('export').disabled=scenes.length===0}
+  $('progressstage').textContent='Exportação interrompida';$('exportstatus').textContent='Não foi possível exportar: '+(e?.message||e)+'. Confira a internet, mantenha a página aberta e tente novamente com um vídeo menor se faltar memória.';
+ }finally{if(progressTimer)clearInterval(progressTimer);exportBtn.disabled=!scenes.length;detectBtn.disabled=!video.src}
 };
-</script>
-</body>
- </html>
+</script></body></html>
