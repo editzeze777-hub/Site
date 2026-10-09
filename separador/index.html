@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Separador de Cenas</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080808;color:white;font-family:Arial,sans-serif;padding:18px}
+main{max-width:700px;margin:auto}
+.card{background:#181818;border:1px solid #333;border-radius:16px;padding:16px;margin:15px 0}
+button,label{display:inline-block;background:#00e676;color:#071108;font-weight:bold;border:0;border-radius:10px;padding:12px;margin:5px 0;cursor:pointer}
+video{width:100%;margin-top:15px;background:#000}
+p{color:#bbb;line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+<a href="../" style="color:#00e676">← Voltar ao Tá na Rede Edit</a>
+<h1>🎬 Separador de Cenas</h1>
+<p>Escolha um vídeo para abrir no celular.</p>
+<div class="card">
+<label for="arquivo">Escolher vídeo</label>
+<input id="arquivo" type="file" accept="video/*">
+<video id="video" controls playsinline></video>
+<p id="estado">Nenhum vídeo selecionado.</p>
+</div>
+<div class="card">
+<h2>Separar cenas</h2>
+<p>Esta versão permite carregar e assistir ao vídeo. A detecção automática e a exportação dos cortes ainda precisam ser adicionadas.</p>
+</div>
+</main>
+<script>
+const arquivo=document.getElementById('arquivo');
+const video=document.getElementById('video');
+const estado=document.getElementById('estado');
+arquivo.addEventListener('change',()=>{
+ const f=arquivo.files[0];
+ if(!f)return;
+ video.src=URL.createObjectURL(f);
+ estado.textContent='Vídeo carregado: '+f.name;
+});
+</script>
+</body>
+  </html>
